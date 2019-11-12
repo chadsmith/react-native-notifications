@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -23,6 +24,7 @@ import com.wix.reactnativenotifications.core.notification.PushNotification;
 import com.wix.reactnativenotifications.core.notification.PushNotificationProps;
 import com.wix.reactnativenotifications.core.notificationdrawer.IPushNotificationsDrawer;
 import com.wix.reactnativenotifications.core.notificationdrawer.PushNotificationsDrawer;
+import com.wix.reactnativenotifications.gcm.FcmInstanceIdRefreshHandlerJob;
 import com.wix.reactnativenotifications.gcm.FcmInstanceIdRefreshHandlerService;
 
 import com.google.firebase.FirebaseApp;
@@ -141,8 +143,17 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
     protected void startGcmIntentService(String extraFlag) {
         final Context appContext = getReactApplicationContext().getApplicationContext();
-        final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
-        tokenFetchIntent.putExtra(extraFlag, true);
-        appContext.startService(tokenFetchIntent);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            final Intent tokenFetchIntent = new Intent();
+            tokenFetchIntent.putExtra(extraFlag, true);
+            FcmInstanceIdRefreshHandlerJob.enqueueWork(appContext, tokenFetchIntent);
+        }
+        else {
+            final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
+            tokenFetchIntent.putExtra(extraFlag, true);
+            appContext.startService(tokenFetchIntent);
+
+        }
     }
 }
