@@ -1,13 +1,22 @@
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
+
+project.ext.react = [
+        root     : "../../../",
+        entryFile: "index.js",
+        bundleAssetName: "index.bundle",
+        bundleInAlpha: true,
+        bundleInBeta: true
+]
+
+apply from: "../../../node_modules/react-native/react.gradle"
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
     buildToolsVersion "28.0.3"
-
     defaultConfig {
         applicationId "com.wix.reactnativenotifications.app"
-        minSdkVersion 19
-        targetSdkVersion 26
+        minSdkVersion 16
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -21,26 +30,33 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+    packagingOptions {
+        pickFirst '**/libjsc.so'
+        pickFirst '**/libc++_shared.so'
+    }
 }
 
+
 configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        def requested = details.requested
-        if (requested.group == 'com.android.support') {
-            if (!requested.name.startsWith("multidex")) {
-                details.useVersion "26.1.0"
-            }
-        }
+    resolutionStrategy {
+        force 'org.webkit:android-jsc:r236355'
     }
 }
 
 dependencies {
-//    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.google.firebase:firebase-core:16.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.facebook.react:react-native:+'
+    implementation 'org.webkit:android-jsc-intl:+'
     implementation project(':react-native-notifications')
 
     testImplementation'junit:junit:4.12'
 }
+
+apply plugin: 'com.google.gms.google-services'
